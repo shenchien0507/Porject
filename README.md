@@ -55,6 +55,22 @@ python manage.py runserver
 
 想改用 MySQL：複製 `.env.example` 成 `.env`，設定 `DB_ENGINE=mysql` 和資料庫帳密，先在 MySQL 建好資料庫（`CREATE DATABASE warehouse CHARACTER SET utf8mb4;`）再 `migrate`。
 
+## 讓其他設備臨時連進來（Cloudflare Tunnel）
+
+展示時想讓手機、平板或別人的電腦在任何地方都能開，可以用 Cloudflare Tunnel 產生一個臨時的公開網址，不用註冊帳號。電腦、`runserver` 和 cloudflared 都要一直開著；重開 cloudflared 網址就會換一個。
+
+1. 安裝 cloudflared（Windows）：`winget install --id Cloudflare.cloudflared`，裝完重開終端機
+2. 在 `.env` 加上（沒有 `.env` 就先複製 `.env.example`）：
+   ```
+   DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,.trycloudflare.com
+   DJANGO_CSRF_TRUSTED_ORIGINS=https://*.trycloudflare.com
+   ```
+3. 照平常啟動：`python manage.py runserver`
+4. 另開一個終端機：`cloudflared tunnel --url http://localhost:8000`
+5. 畫面會印出一個 `https://xxxx.trycloudflare.com` 網址，任何設備打開就能用
+
+網址是公開的，知道的人都能看到登入頁。展示完記得關掉，也記得改掉 `demo1234` 這種預設密碼。
+
 ## 展示流程
 
 `demo/` 資料夾有兩份範例訂單 Excel（買家資料都已遮罩）：
