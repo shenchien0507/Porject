@@ -1,0 +1,81 @@
+{% extends "backoffice/base.html" %}
+
+{% block title %}{{ menu_item.label }}{% endblock %}
+
+{% block manage_header %}
+  {% include "backoffice/_breadcrumb.html" with current=object %}
+  <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+    <h1 class="h3 mb-0 me-auto">
+      統計分組 {{ object }}
+      <span class="badge {% if object.is_active %}text-bg-success{% elif object.is_locked %}text-bg-secondary{% else %}text-bg-warning{% endif %} align-middle fs-6">{{ object.status }}</span>
+    </h1>
+    {% if not object.is_locked and object.source_combos %}
+      <a class="btn btn-primary" href="{% url 'orders_manage:group_create' object.pk %}">新增分組</a>
+    {% endif %}
+    {% if not object.is_active %}
+      <form method="post" action="{% url 'orders_manage:group_version_activate' object.pk %}"
+            onsubmit="return confirm('確定讓 {{ object }} 生效？{% if active %}目前生效的 {{ active }} 會停用，{% endif %}之後匯入的批次都用 {{ object }} 統計。{% if not object.is_locked %}生效後就不能再改。{% endif %}');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success"{% if not groups %} disabled title="還沒有分組"{% endif %}>生效</button>
+      </form>
+    {% endif %}
+    <form method="post" action="{% url 'orders_manage:group_version_copy' object.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-primary">複製成新版本</button>
+    </form>
+  </div>
+  <p class="text-muted small mb-3">
+    {% if object.is_locked %}這個版本生效過，只能查看；要調整請按「複製成新版本」。{% else %}草稿：新增、修改分組後按「生效」，之後匯入的批次才會用這個版本。{% endif %}
+    同一張訂單符合多組時算進順序最前面的那組；都不符合的列在「未分組」。
+  </p>
+{% endblock %}
+
+{% block manage_content %}
+  <div class="card mb-3">
+    <div class="card-body py-2">
+      {% if object.source_combos %}
+        來源檔：{{ object.source_file_name }}，讀到 {{ platform_count }} 個平台、{{ object.source_combos|length }} 種平台／店鋪／出貨類型組合，條件只能從這些值選。
+      {% else %}
+        <span class="text-danger">這個版本還沒有來源檔，條件沒有選項。</span>{% if object.is_locked %}請按「複製成新版本」，再在草稿上傳來源檔。{% endif %}
+      {% endif %}
+      {% if not object.is_locked %}
+        <form method="post" action="{% url 'orders_manage:group_version_source' object.pk %}" enctype="multipart/form-data" class="d-flex flex-wrap gap-2 align-items-center mt-2">
+          {% csrf_token %}
+          <input type="file" name="file" class="form-control w-auto" required>
+          <button type="submit" class="btn btn-outline-primary">{% if object.source_combos %}重新上傳來源檔{% else %}上傳來源檔{% endif %}</button>
+          <span class="form-text">用目前生效的欄位對應讀取；重新上傳只換選項，已設定的條件不會刪掉。</span>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <thead class="table-light">
+        <tr><th>順序</th><th>分組名稱</th><th>條件</th><th>切開時間</th><th>非去重</th>{% if not object.is_locked %}<th class="text-end">操作</th>{% endif %}</tr>
+      </thead>
+      <tbody>
+        {% for row in groups %}
+          <tr>
+            <td>{{ row.group.sort_order }}</td>
+            <td>{{ row.group.name }}</td>
+            <td>{% for c in row.conditions %}<div>{{ c }}</div>{% endfor %}</td>
+            <td>{{ row.cutoff }}</td>
+            <td>{{ row.group.show_rows|yesno:"列出,—" }}</td>
+            {% if not object.is_locked %}
+              <td class="text-end text-nowrap">
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'orders_manage:group_edit' object.pk row.group.pk %}">編輯</a>
+                <form method="post" action="{% url 'orders_manage:group_delete' object.pk row.group.pk %}" class="d-inline" onsubmit="return confirm('確定刪除分組「{{ row.group.name }}」？');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger">刪除</button>
+                </form>
+              </td>
+            {% endif %}
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-muted">還沒有分組。</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="text-muted small">備註：{{ object.note|default:"—" }}</p>
+{% endblock %}

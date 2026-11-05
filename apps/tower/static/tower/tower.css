@@ -1,0 +1,44 @@
+/* 數據塔：狀態顏色用角色變數，長條是純 HTML */
+.tower-board {
+  --state-unregistered: #f3f2ef;
+  --state-not_started: #d6d5d0;
+  --state-picking: #2a78d6;
+  --state-wait_allocation: #e8a93a;
+  --state-allocating: #eb6834;
+  --state-done: #1baf7a;
+  --text-muted: #6c6b66;
+}
+.tower-board .tower-card { border: 1px solid #e3e2de; border-radius: .5rem; padding: .75rem 1rem; height: 100%; background: #fff; }
+.tower-board .tower-label { font-size: 1.125rem; font-weight: 600; }
+.tower-board .tower-sub { font-size: .8125rem; color: var(--text-muted); }
+.tower-board .tower-value { font-size: 2rem; font-weight: 600; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.tower-board .tower-track { display: flex; gap: 2px; height: 1.25rem; background: #f3f2ef; border-radius: 4px; overflow: hidden; }
+.tower-board .tower-seg { height: 100%; min-width: 3px; }
+.tower-board .tower-states td { border: 0; padding: .15rem 0; font-variant-numeric: tabular-nums; }
+.tower-board .tower-swatch { display: inline-block; width: .75rem; height: .75rem; border-radius: 2px; margin-right: .4rem; vertical-align: -1px; }
+.tower-board .seg-not_started { background: var(--state-not_started); }
+.tower-board .seg-picking { background: var(--state-picking); }
+.tower-board .seg-wait_allocation { background: var(--state-wait_allocation); }
+.tower-board .seg-allocating { background: var(--state-allocating); }
+.tower-board .seg-done { background: var(--state-done); }
+
+@media (max-width: 576px) {
+  .tower-board .tower-value { font-size: 1.5rem; }
+}
+.tower-board .tower-register { font-size: .875rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.tower-board .tower-register.is-even { color: #11704c; }
+.tower-board .tower-register.is-over { color: #b42318; font-weight: 600; }
+.tower-board .seg-unregistered { background: #f3f2ef; box-shadow: inset 0 0 0 1px #d6d5d0; }
+
+/* 緊湊數字卡：停在上面一下（0.5 秒）才跳出詳細小窗（位置由 tower.js 算，開在卡片旁邊，不會超出畫面），點卡片進單獨頁 */
+.tower-board .tower-tile { position: relative; border: 1px solid #e3e2de; border-radius: .5rem; padding: .6rem 1rem; height: 100%; background: #fff; }
+.tower-board .tower-tile:hover { border-color: #b9b8b2; }
+.tower-board .tower-tile .tower-value { font-size: 1.75rem; }
+.tower-board .tower-thin { height: .5rem; }
+.tower-board .tower-pop {
+  position: fixed; z-index: 1050; top: 0; left: 0; width: 22rem; max-width: calc(100vw - 1rem);
+  opacity: 0; visibility: hidden; pointer-events: none; transform: scale(.96);
+  box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .18); border-radius: .5rem; background: #fff;
+  transition: opacity .15s ease, transform .15s ease, visibility 0s .15s;
+}
+.tower-board .tower-tile.is-open .tower-pop { opacity: 1; visibility: visible; transform: scale(1); transition: opacity .15s ease, transform .15s ease; }

@@ -1,0 +1,7 @@
+# 網站與資料庫
+Django>=5.2,<5.3
+PyMySQL>=1.1
+python-dotenv>=1.0
+openpyxl>=3.1  # 讀取匯入的 Excel 檔
+
+# 網路爬蟲（requests、beautifulsoup4）、資料分析（pandas、scikit-learn）等真的要用時再加回來

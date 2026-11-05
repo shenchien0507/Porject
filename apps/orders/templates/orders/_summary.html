@@ -1,0 +1,84 @@
+{% comment %}
+一份統計：主表、依下單日期、明細。用法：{% include "orders/_summary.html" with summary=... title=... note=... anchor=... %}
+{% endcomment %}
+  {% if by_import_time %}
+    <div class="alert alert-info py-2">作業日當天有 {{ by_import_time }} 張訂單的下單時間是 00:00:00，{% if import_time_note %}{{ import_time_note }}{% else %}依匯入時間 {{ run.created_at|date:"H:i" }}{% endif %} 判斷前後。</div>
+  {% endif %}
+
+  <h2 class="h5" id="{{ anchor }}">{{ title }}<span class="text-muted small fw-normal ms-2">{% if note %}{{ note }}　{% endif %}{% if first_day %}訂單日期 {{ first_day|date:"m/d" }}{% if last_day != first_day %}–{{ last_day|date:"m/d" }}{% endif %}{% endif %}</span></h2>
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <thead class="table-light">
+        <tr><th>分組</th><th>時段／日期</th><th class="text-end">訂單數（去重）</th><th class="text-end">訂單數（非去重）</th></tr>
+      </thead>
+      <tbody>
+        {% for row in summary.groups %}
+          <tr{% if row.name == "未分組" %} class="table-warning"{% endif %}>
+            <td>{{ row.name }}</td>
+            <td>{% if row.date %}{{ row.date|date:"m/d" }}{% elif row.period %}{% if row.dates %}{{ row.dates }} {% endif %}{{ row.period }}{% else %}{{ row.dates|default:"—" }}{% endif %}</td>
+            <td class="text-end fw-bold fs-5">{{ row.count.distinct }}</td>
+            <td class="text-end">{% if row.show_rows %}{{ row.count.rows }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr class="table-light">
+          <th colspan="2">{{ title }}全部</th>
+          <th class="text-end">{% if summary.rows_groups %}{{ summary.counted }}（扣{{ summary.rows_groups|join:"、" }}）{% else %}{{ summary.total }}{% endif %}</th>
+          <th class="text-end">{% if summary.rows_groups %}{{ summary.rows_total }}{% endif %}</th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <details class="mt-4">
+    <summary class="h6">依下單日期：每天各分組的數字</summary>
+    <div class="table-responsive mt-2">
+      <table class="table table-sm table-striped align-middle">
+        <thead class="table-light">
+          <tr><th>分組</th><th>時段</th><th class="text-end">去重</th><th class="text-end">非去重</th></tr>
+        </thead>
+        {% for day, day_total, rows in summary.by_day %}
+        <tbody>
+          <tr class="table-secondary" data-day>
+            <th colspan="2">{% if day %}{{ day|date:"Y/m/d" }}{% else %}沒有日期{% endif %}</th>
+            <th class="text-end">當天 {{ day_total }} 張</th><th></th>
+          </tr>
+          {% for row in rows %}
+            <tr>
+              <td>{{ row.name }}</td>
+              <td>{{ row.period|default:"—" }}</td>
+              <td class="text-end">{{ row.count.distinct }}</td>
+              <td class="text-end">{% if row.show_rows %}{{ row.count.rows }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        {% endfor %}
+      </table>
+    </div>
+  </details>
+
+  <details class="mt-2">
+    <summary class="h6">明細：每天各分組裡的平台、店鋪、出貨類型</summary>
+    <div class="table-responsive mt-2">
+      <table class="table table-sm table-striped align-middle">
+        <thead class="table-light">
+          <tr><th>日期</th><th>分組</th><th>平台</th><th>店鋪</th><th>出貨類型</th><th>時段</th><th class="text-end">去重</th><th class="text-end">非去重</th></tr>
+        </thead>
+        <tbody>
+          {% for row in summary.details %}
+            <tr>
+              <td>{% if row.date %}{{ row.date|date:"Y/m/d" }}{% else %}沒有日期{% endif %}</td>
+              <td>{{ row.group }}</td>
+              <td>{{ row.platform|default:"（空白）" }}</td>
+              <td>{{ row.shop|default:"（空白）" }}</td>
+              <td>{{ row.ship_type|default:"（空白）" }}</td>
+              <td>{{ row.period|default:"—" }}</td>
+              <td class="text-end">{{ row.count.distinct }}</td>
+              <td class="text-end">{% if row.show_rows %}{{ row.count.rows }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </details>
