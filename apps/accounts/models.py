@@ -30,6 +30,11 @@ class User(AbstractUser):
         """撿貨、配貨刷的員工編號就是工號。"""
         return self.username
 
+    @property
+    def label(self):
+        """畫面上顯示的「工號 姓名」；姓名和工號一樣（或沒填）時只顯示一次。"""
+        return self.username if self.name in ("", self.username) else f"{self.username} {self.name}"
+
     def get_full_name(self):
         return self.name
 
@@ -37,4 +42,4 @@ class User(AbstractUser):
         return self.name or self.username
 
     def __str__(self):
-        return f"{self.username} {self.name}".strip()
+        return self.label

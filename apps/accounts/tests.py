@@ -41,6 +41,10 @@ class RoleTests(TestCase):
         self.assertTrue(user.is_admin)
         self.assertEqual(user.level_display, "管理員")
 
+    def test_label_shows_name_once_when_same_as_employee_no(self):
+        self.assertEqual(make_user("002", name="002").label, "002")
+        self.assertEqual(make_user("003", name="小明").label, "003 小明")
+
     def test_only_admin_passes_rules(self):
         self.assertFalse(allows(make_user("E001"), "records-edit-all"))
         self.assertTrue(allows(make_user("A001", Level.ADMIN), "records-edit-all"))

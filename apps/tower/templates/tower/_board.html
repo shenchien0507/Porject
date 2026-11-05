@@ -42,7 +42,7 @@
                 <tr>
                   <td>{{ stage }}</td>
                   <td>{{ entry.number }}</td>
-                  <td>{{ entry.start_employee.employee_no }} {{ entry.start_employee.name }}</td>
+                  <td>{{ entry.start_employee.label }}</td>
                   <td>{{ entry.started_at|date:"H:i:s" }}</td>
                 </tr>
               {% endfor %}

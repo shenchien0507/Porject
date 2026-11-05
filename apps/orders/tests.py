@@ -32,7 +32,20 @@ def xlsx(headers=HEADERS, rows=ROWS, name="匯出.xlsx", title_rows=0):
         ws.append(row)
     buffer = BytesIO()
     wb.save(buffer)
-    return SimpleUploadedFile(name, buffer.getvalue())
+    return SimpleUploadedFile(name, stable_bytes(buffer.getvalue()))
+
+
+def stable_bytes(data):
+    """openpyxl 會把存檔當下的時間寫進檔案（屬性與 zip 時間），同樣內容跨秒存出來會不一樣。
+    測試要比對「同一個檔案」，所以把時間固定。"""
+    source, target = zipfile.ZipFile(BytesIO(data)), BytesIO()
+    with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as out:
+        for item in source.infolist():
+            content = source.read(item.filename)
+            if item.filename == "docProps/core.xml":
+                content = re.sub(rb"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ", b"2026-01-01T00:00:00Z", content)
+            out.writestr(zipfile.ZipInfo(item.filename, date_time=(2026, 1, 1, 0, 0, 0)), content, zipfile.ZIP_DEFLATED)
+    return target.getvalue()
 
 
 def xlsx_wrong_dimension(**kwargs):

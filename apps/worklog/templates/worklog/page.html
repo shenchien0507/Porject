@@ -51,12 +51,12 @@
           {% with entry=row.entry %}
             <tr{% if show_anomaly and entry.anomaly %} class="table-danger"{% endif %}>
               <td>{{ entry.number }}</td>
-              <td>{{ entry.start_employee.employee_no }} {{ entry.start_employee.name }}</td>
+              <td>{{ entry.start_employee.label }}</td>
               <td class="text-nowrap">{{ entry.started_at|date:"Y-m-d H:i:s" }}</td>
               {% if entry.is_open %}
                 <td colspan="2"><span class="badge text-bg-warning">進行中</span></td>
               {% else %}
-                <td>{{ entry.end_employee.employee_no }} {{ entry.end_employee.name }}</td>
+                <td>{{ entry.end_employee.label }}</td>
                 <td class="text-nowrap">{{ entry.ended_at|date:"Y-m-d H:i:s" }}</td>
               {% endif %}
               {% if show_anomaly %}<td>{% if entry.anomaly %}<span class="badge text-bg-danger" title="配貨開始時，撿貨同編號還沒刷結束">撿貨未結束</span>{% endif %}</td>{% endif %}

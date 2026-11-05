@@ -51,11 +51,11 @@ class StagePageView(StagePageMixin, FormView):
         entry, started = scan(self.stage, form.cleaned_data["number"], form.employee, self.request.user)
         employee = form.employee
         if started:
-            text = f"{entry.number} 開始（{employee.employee_no} {employee.name}，{timezone.localtime(entry.started_at):%H:%M:%S}）"
+            text = f"{entry.number} 開始（{employee.label}，{timezone.localtime(entry.started_at):%H:%M:%S}）"
             if entry.anomaly and can_see_anomaly(self.request.user):
                 text += "；撿貨還沒刷結束，已標記異常"
         else:
-            text = f"{entry.number} 結束（{employee.employee_no} {employee.name}，{timezone.localtime(entry.ended_at):%H:%M:%S}）"
+            text = f"{entry.number} 結束（{employee.label}，{timezone.localtime(entry.ended_at):%H:%M:%S}）"
         messages.success(self.request, text)
         return redirect(self.page_url())
 
