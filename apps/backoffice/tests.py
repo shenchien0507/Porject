@@ -49,11 +49,14 @@ class NavbarTests(BackofficeTestCase):
         self.login(make_user("e1"))
         response = self.client.get(reverse("home"))
         groups = response.context["feature_groups"]
-        self.assertEqual(list(groups), ["訂單", "作業", "數據"])
+        self.assertEqual(list(groups), ["訂單", "作業"])  # 數據塔只有管理員看得到
         self.assertEqual([item.label for item in groups["作業"]], ["登記紀錄", "撿貨登記", "配貨登記"])
         self.assertContains(response, 'data-bs-toggle="dropdown" aria-expanded="false">作業</a>', html=False)
-        self.assertContains(response, f'<a class="nav-link" href="{reverse("tower:index")}">數據塔</a>', html=True)
+        self.assertNotContains(response, "數據塔")
         self.assertEqual(response.context["tool_menu"], [])
+        self.login(make_user("boss", Level.ADMIN))
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, f'<a class="nav-link" href="{reverse("tower:index")}">數據塔</a>', html=True)
 
     def test_group_is_active_on_its_pages(self):
         self.login(make_user("e1"))

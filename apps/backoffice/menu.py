@@ -27,7 +27,7 @@ MENU = [
     MenuItem("records", "登記紀錄", "records:list", "作業", section="feature"),
     MenuItem("worklog-picking", "撿貨登記", "worklog:picking", "作業", section="feature"),
     MenuItem("worklog-allocation", "配貨登記", "worklog:allocation", "作業", section="feature"),
-    MenuItem("data-tower", "數據塔", "tower:index", "數據", section="feature"),
+    MenuItem("data-tower", "數據塔", "tower:index", "數據", admin_only=True, section="feature"),
     # 後台設定只有管理員能用
     MenuItem("manage-users", "系統帳號", "accounts_manage:user_list", "帳號", admin_only=True),
     MenuItem("manage-order-import", "匯入欄位對應", "orders_manage:version_list", "訂單", admin_only=True),

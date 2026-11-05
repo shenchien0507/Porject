@@ -129,13 +129,18 @@ class TowerTests(TowerBase):
 class TowerPageTests(TestCase):
     def setUp(self):
         Record.objects.create(number="X1", quantity=7, name="x", kind="蝦皮其他")
-        self.client.login(username=make_user("S001", Level.STAFF).username, password="pw12345!")
+        self.client.login(username=make_user("A001", Level.ADMIN).username, password="pw12345!")
 
     def test_page_and_partial(self):
         self.assertContains(self.client.get(URL), "蝦皮其他")
         partial = self.client.get(URL, {"partial": 1})
         self.assertContains(partial, "已登記 7 / 7")
         self.assertNotContains(partial, "<html")
+
+    def test_staff_cannot_see_tower(self):
+        self.client.login(username=make_user("S001", Level.STAFF).username, password="pw12345!")
+        self.assertEqual(self.client.get(URL).status_code, 403)
+        self.assertNotContains(self.client.get("/"), "數據塔")
 
 
 

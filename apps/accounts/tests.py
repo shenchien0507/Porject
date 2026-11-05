@@ -46,12 +46,13 @@ class RoleTests(TestCase):
         self.assertTrue(allows(make_user("A001", Level.ADMIN), "records-edit-all"))
         self.assertFalse(is_admin(make_user("E002", Level.ADMIN, is_active=False)))
 
-    def test_home_lists_features_for_everyone(self):
+    def test_home_lists_features_for_staff(self):
         make_user("E001")
         self.client.login(username="E001", password="pw12345!")
         response = self.client.get(reverse("home"))
-        for label in ["訂單統計", "當日統計", "登記紀錄", "撿貨登記", "配貨登記", "數據塔"]:
+        for label in ["訂單統計", "當日統計", "登記紀錄", "撿貨登記", "配貨登記"]:
             self.assertContains(response, label)
+        self.assertNotContains(response, "數據塔")  # 數據塔只有管理員能看
         self.assertNotContains(response, "後台管理")
 
 
